@@ -1,5 +1,6 @@
 package org.example.quoraappapi.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,6 +15,7 @@ import java.util.Optional;
 @Setter
 public class User extends BaseModel{
     @Column(nullable = false,unique=true)
+    @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Question> questions;
     private String userName;

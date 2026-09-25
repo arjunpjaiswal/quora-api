@@ -17,5 +17,5 @@ public class Follow extends BaseModel{
     @ManyToOne
     @JoinColumn(name = "following_id")
     private User following;
-
 }
+
