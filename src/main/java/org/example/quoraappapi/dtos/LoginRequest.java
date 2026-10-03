@@ -1,17 +1,15 @@
 package org.example.quoraappapi.dtos;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-
-
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class RegisterUserRequest{
-    private String userName;
+public class LoginRequest {
     private String email;
     private String password;
 }

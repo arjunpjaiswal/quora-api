@@ -2,10 +2,12 @@ package org.example.quoraappapi.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.example.quoraappapi.dtos.RegisterUserRequest;
+import org.example.quoraappapi.dtos.UpdateUserRequest;
 import org.example.quoraappapi.models.User;
 import org.example.quoraappapi.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -26,7 +28,9 @@ public ResponseEntity<User> registerUser(@RequestBody RegisterUserRequest reques
     return ResponseEntity.status(HttpStatus.CREATED).body(created);
 }
     @PutMapping("/{userId}")
-public User updateUser(@PathVariable UUID userId, @RequestBody User user) {
-    return userService.updateUser(userId, user);
-}
+    public User updateUser(@PathVariable UUID userId,
+                           @RequestBody UpdateUserRequest request,
+                           Authentication authentication) {
+        return userService.updateUser(userId, request, authentication.getName());
+    }
 }

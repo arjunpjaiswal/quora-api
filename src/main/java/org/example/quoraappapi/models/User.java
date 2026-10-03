@@ -14,12 +14,18 @@ import java.util.Optional;
 @Getter
 @Setter
 public class User extends BaseModel{
-    @Column(nullable = false,unique=true)
     @JsonIgnore
     @OneToMany(mappedBy = "user")
     private List<Question> questions;
+
     private String userName;
-    @Column(nullable = false,unique = true)
+
+    @Column(nullable = false, unique = true)
     private String email;
+
     private String bio;
+
+    @JsonIgnore
+    @Column(nullable = false)
+    private String password;
 }
