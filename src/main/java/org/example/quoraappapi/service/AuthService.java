@@ -16,12 +16,16 @@ public class AuthService {
     private final JwtService jwtService;
 
     public AuthResponse login(LoginRequest request) {
+        if (request.getEmail() == null || request.getPassword() == null) {
+            throw new IllegalArgumentException("Email and password are required");
+        }
+        String email = request.getEmail().trim().toLowerCase();
+
         // loads the user via CustomUserDetailsService and compares the
         // raw password against the stored BCrypt hash; throws if wrong
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+                new UsernamePasswordAuthenticationToken(email, request.getPassword()));
 
-        // only reached if the credentials were correct
-        return new AuthResponse(jwtService.generateToken(request.getEmail()));
+        return new AuthResponse(jwtService.generateToken(email));
     }
 }
