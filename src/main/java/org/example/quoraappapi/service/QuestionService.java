@@ -2,6 +2,7 @@ package org.example.quoraappapi.service;
 
 import lombok.RequiredArgsConstructor;
 import org.example.quoraappapi.dtos.CreateQuestionRequest;
+import org.example.quoraappapi.dtos.FeedItemResponse;
 import org.example.quoraappapi.exceptions.ResourceNotFoundException;
 import org.example.quoraappapi.models.Question;
 import org.example.quoraappapi.models.Topic;
@@ -10,38 +11,53 @@ import org.example.quoraappapi.repositories.QuestionRepository;
 import org.example.quoraappapi.repositories.TopicRepository;
 import org.example.quoraappapi.repositories.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-
 
 @Service
 @RequiredArgsConstructor
 public class QuestionService {
+
     private final QuestionRepository questionRepository;
     private final TopicRepository topicRepository;
     private final UserRepository userRepository;
-    public   Question createQuestion(CreateQuestionRequest request){
-Optional<User> fetchedUser=userRepository.findById(request.getUserId());
-if(fetchedUser.isEmpty()) throw new ResourceNotFoundException("User not found");
-List<String>fetchedTopicTags=request.getTopicTags();
-List<Topic>fetchedTopics=new ArrayList<>();
-for(String topic:fetchedTopicTags){
-    Optional<Topic>existingTopic=topicRepository.findByName(topic);
-    Topic topics = existingTopic.isPresent() ? existingTopic.get() : topicRepository.save(Topic.builder().name(topic).build());
-    fetchedTopics.add(topics);
 
-}
-Question question=Question.builder()
-        .user(fetchedUser.get())
-        .title(request.getTitle())
-        .body(request.getBody()).
-        topics(fetchedTopics).build();
-return questionRepository.save(question);
+    @Transactional
+    public FeedItemResponse createQuestion(CreateQuestionRequest request, String email) {
+        User author = userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        if (request.getTitle() == null || request.getTitle().isBlank()) {
+            throw new IllegalArgumentException("Title is required");
+        }
+
+        List<Topic> topics = new ArrayList<>();
+        if (request.getTopicTags() != null) {
+            for (String tag : request.getTopicTags()) {
+                if (tag == null || tag.isBlank()) continue;
+                String name = tag.trim();
+                Topic topic = topicRepository.findByName(name)
+                        .orElseGet(() -> topicRepository.save(Topic.builder().name(name).build()));
+                if (!topics.contains(topic)) topics.add(topic);
+            }
+        }
+
+        Question question = Question.builder()
+                .user(author)
+                .title(request.getTitle())
+                .body(request.getBody())
+                .topics(topics)
+                .build();
+
+        return FeedItemResponse.from(questionRepository.save(question));
     }
-    public List<Question> searchQuestion(String text,String tag){
-       return  questionRepository.searchQuestions(text,tag);
-          }
 
+    @Transactional(readOnly = true)
+    public List<FeedItemResponse> searchQuestion(String text, String tag) {
+        return questionRepository.searchQuestions(text, tag).stream()
+                .map(FeedItemResponse::from)
+                .toList();
+    }
 }

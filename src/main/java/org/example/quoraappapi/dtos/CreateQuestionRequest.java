@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -15,6 +14,5 @@ import java.util.UUID;
 public class CreateQuestionRequest {
     private String title;
     private String body;
-    private UUID userId;
     private List<String> topicTags;
 }

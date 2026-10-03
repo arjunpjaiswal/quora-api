@@ -9,13 +9,14 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name="follows")
-public class Follow extends BaseModel{
+@Table(name = "follows",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"follower_id", "following_id"}))
+public class Follow extends BaseModel {
     @ManyToOne
-    @JoinColumn(name="follower_id")
+    @JoinColumn(name = "follower_id")
     private User follower;
+
     @ManyToOne
     @JoinColumn(name = "following_id")
     private User following;
 }
-
